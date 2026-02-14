@@ -1,180 +1,107 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useCreative } from '@/context/CreativeContext';
-import Link from 'next/link';
 
-export default function Dashboard() {
-  const { projects, currentProject, createProject, selectProject, deleteProject } = useCreative();
-  const [showNewProjectForm, setShowNewProjectForm] = useState(false);
-  const [formData, setFormData] = useState({ title: '', description: '' });
+export default function HomePage() {
+  const { projects, createProject, deleteProject, selectProject } = useCreative();
+  const router = useRouter();
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newDescription, setNewDescription] = useState('');
 
-  const handleCreateProject = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (formData.title.trim()) {
-      createProject(formData.title, formData.description);
-      setFormData({ title: '', description: '' });
-      setShowNewProjectForm(false);
+  const handleCreateProject = () => {
+    if (newTitle.trim()) {
+      createProject(newTitle, newDescription);
+      setNewTitle('');
+      setNewDescription('');
+      setShowCreateForm(false);
+    }
+  };
+
+  const handleSelectProject = (id: string) => {
+    selectProject(id);
+    router.push('/dashboard');
+  };
+
+  const handleDeleteProject = (id: string) => {
+    if (confirm('정말로 이 소설을 삭제하시겠습니까?')) {
+      deleteProject(id);
     }
   };
 
   return (
-    <div className="p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* 헤더 */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">📊 대시보드</h1>
-          <p className="text-gray-600">당신의 창작 프로젝트를 관리하세요</p>
+    <div className="min-h-screen bg-gradient-to-b from-purple-500 to-indigo-600">
+      <header className="max-w-7xl mx-auto px-6 py-8">
+        <div className="flex items-center justify-between">
+          <div className="text-white font-bold">ThankYou Navy</div>
+          <div className="text-white/90">&nbsp;</div>
         </div>
+      </header>
 
-        {/* 새 프로젝트 생성 버튼 */}
-        <div className="mb-8">
-          <button
-            onClick={() => setShowNewProjectForm(!showNewProjectForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-          >
-            + 새 프로젝트 만들기
-          </button>
-        </div>
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 pt-12 pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+            <div className="lg:pr-12">
+              <h1 className="text-6xl md:text-8xl font-extrabold text-white leading-tight">Somni</h1>
+              <p className="mt-6 text-lg text-white/90 max-w-xl">AI와 함께 창작을 더 빠르고 즐겁게 — 소설 작성, 캐릭터 관리, 스토리보드를 한 곳에서.</p>
+              <div className="mt-8 flex gap-4">
+                <button onClick={() => setShowCreateForm(true)} className="bg-white text-indigo-600 px-6 py-3 rounded-full font-semibold shadow-lg">새 소설 추가</button>
+                <button onClick={() => router.push('/dashboard')} className="bg-white/20 text-white px-6 py-3 rounded-full font-semibold border border-white/30">대시보드로 이동</button>
+              </div>
+            </div>
 
-        {/* 새 프로젝트 폼 */}
-        {showNewProjectForm && (
-          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-            <form onSubmit={handleCreateProject}>
-              <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  프로젝트 이름
-                </label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="예: 마이 판타지 소설"
-                />
-              </div>
-              <div className="mb-6">
-                <label className="block text-gray-700 font-bold mb-2">
-                  설명
-                </label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                  placeholder="프로젝트에 대한 간단한 설명을 입력하세요"
-                  rows={3}
-                />
-              </div>
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors"
-                >
-                  생성
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowNewProjectForm(false)}
-                  className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
-                >
-                  취소
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* 현재 선택된 프로젝트 정보 */}
-        {currentProject && (
-          <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-8 rounded-lg">
-            <h2 className="text-2xl font-bold text-blue-900 mb-2">
-              현재 프로젝트: {currentProject.title}
-            </h2>
-            <p className="text-blue-800 mb-4">{currentProject.description}</p>
-            <div className="flex gap-4">
-              <Link
-                href="/editor"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              >
-                ✍️ 텍스트 에디터
-              </Link>
-              <Link
-                href="/characters"
-                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              >
-                👥 캐릭터 관리
-              </Link>
-              <Link
-                href="/storyboard"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-              >
-                🎬 스토리보드
-              </Link>
+            <div className="relative flex justify-center lg:justify-end">
+              <img src="/file.svg" alt="mascot" className="w-64 md:w-80 lg:w-96 drop-shadow-2xl" />
             </div>
           </div>
-        )}
+        </div>
 
-        {/* 프로젝트 목록 */}
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            📁 내 프로젝트
-          </h2>
-          {projects.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
-              <p className="text-gray-600 text-lg">
-                아직 프로젝트가 없습니다.
-              </p>
-              <p className="text-gray-500">
-                새 프로젝트를 만들어서 시작해보세요!
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {projects.map((project) => (
-                <div
-                  key={project.id}
-                  className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer ${
-                    currentProject?.id === project.id
-                      ? 'border-2 border-blue-500 bg-blue-50'
-                      : 'border border-gray-200'
-                  }`}
-                  onClick={() => selectProject(project.id)}
-                >
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {project.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 line-clamp-2">
-                    {project.description}
-                  </p>
-                  <div className="text-sm text-gray-500 mb-4">
-                    <p>📝 캐릭터: {project.characters.length}</p>
-                    <p>🎬 씬: {project.timeline.events.length}</p>
-                    <p>
-                      ⏰{' '}
-                      {project.updatedAt.toLocaleDateString('ko-KR')}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteProject(project.id);
-                      }}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition-colors"
-                    >
-                      삭제
-                    </button>
-                  </div>
+        {/* white rounded overlay */}
+        <div className="bg-white rounded-t-3xl -mt-12 pt-12">
+          <div className="max-w-7xl mx-auto px-6 pb-20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 -mt-6">
+              {projects.length === 0 ? (
+                <div className="col-span-full bg-white/80 border border-indigo-100 rounded-2xl p-8 shadow">
+                  <h3 className="text-2xl font-semibold text-indigo-600 mb-2">아직 소설이 없습니다</h3>
+                  <p className="text-gray-600 mb-4">새 소설을 추가해 창작을 시작해보세요.</p>
+                  <button onClick={() => setShowCreateForm(true)} className="bg-indigo-600 text-white px-5 py-2 rounded-full">소설 추가</button>
                 </div>
-              ))}
+              ) : (
+                projects.map((project) => (
+                  <div key={project.id} className="bg-white rounded-2xl p-6 border border-gray-100 shadow hover:shadow-lg transition">
+                    <h4 className="text-lg font-semibold text-indigo-600">{project.title}</h4>
+                    <p className="text-sm text-gray-600 mt-2">{project.description}</p>
+                    <div className="mt-4 flex gap-3">
+                      <button onClick={() => handleSelectProject(project.id)} className="px-4 py-2 bg-green-500 text-white rounded-full">선택</button>
+                      <button onClick={() => handleDeleteProject(project.id)} className="px-4 py-2 bg-red-500 text-white rounded-full">삭제</button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* Modal */}
+      {showCreateForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={() => setShowCreateForm(false)} />
+          <div className="relative bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+            <h3 className="text-2xl font-semibold mb-4">새 소설 추가</h3>
+            <input type="text" placeholder="소설 제목" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl mb-4" />
+            <textarea placeholder="소설 설명" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl mb-6" rows={4} />
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setShowCreateForm(false)} className="px-4 py-2 rounded-full border">취소</button>
+              <button onClick={handleCreateProject} className="px-5 py-2 rounded-full bg-indigo-600 text-white">추가</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
